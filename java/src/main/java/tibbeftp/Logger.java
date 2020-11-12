@@ -63,8 +63,8 @@ public class Logger {
         log("Info", msg);
     }
 
-    public void debug(String msg) {
-        log("Debug", msg);
+    public void warning(String msg) {
+        log("WARNING", msg);
     }
 
     public void error(String msg) {

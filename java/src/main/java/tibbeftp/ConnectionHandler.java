@@ -17,6 +17,8 @@ import java.util.TimeZone;
  */
 public class ConnectionHandler extends Thread {
 
+    public static final boolean allowAnyDataPortIp = "true".equals(System.getenv("PASV_PROMISCUOUS"));
+
     enum TransferMode {
         TEXT, BINARY
     }
@@ -165,6 +167,11 @@ public class ConnectionHandler extends Thread {
                 s = new Socket(mPortIP, mPortPort);
             } else if (mPasv) {
                 s = mServerSocketData.accept();
+                boolean dataIpSameAsCommandPortIp = s.getInetAddress().equals(mSocket.getInetAddress());
+                if (!allowAnyDataPortIp && !dataIpSameAsCommandPortIp) {
+                    logger.warning("Illegal data connection: Source IP mismatch: " + s.getInetAddress());
+                    s.close();
+                }
             }
         } finally {
             if (mServerSocketData != null) {
