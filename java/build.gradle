@@ -1,0 +1,33 @@
+import java.text.SimpleDateFormat
+
+plugins {
+    id 'java'
+}
+
+group 'tibbeftp'
+version = "${buildTime()}"
+
+def buildTime() {
+    def df = new SimpleDateFormat("yyyyMMddHHmm")
+    return df.format(new Date())
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+project.configurations.implementation.setCanBeResolved(true)
+
+jar {
+    manifest {
+        attributes(
+                "Main-Class": "tibbeftp.Main",
+                "Class-Path": configurations.implementation.collect { it.name }.join(' '),
+                "Implementation-Version": "${buildTime()}"
+        )
+    }
+    dependsOn('dependencies')
+}

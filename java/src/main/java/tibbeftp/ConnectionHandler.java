@@ -504,7 +504,7 @@ public class ConnectionHandler extends Thread {
             mPasv = false;
             mActive = false;
 
-            send("220 Welcome to the TibbeFTP v" + MyFTP.VERSION + " - jespertiberg.net!");
+            send("220 Welcome to the TibbeFTP v" + MyFTP.VERSION);
 
             String cmdLine;
             while ((cmdLine = readLine()) != null) {
