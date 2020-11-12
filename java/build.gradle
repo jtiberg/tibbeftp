@@ -26,7 +26,8 @@ jar {
         attributes(
                 "Main-Class": "tibbeftp.Main",
                 "Class-Path": configurations.implementation.collect { it.name }.join(' '),
-                "Implementation-Version": "${buildTime()}"
+                "Implementation-Version": "${buildTime()}",
+                "Home": "https://github.com/jtiberg/tibbeftp"
         )
     }
     dependsOn('dependencies')
