@@ -14,9 +14,15 @@ cd java
 Target file: **build/TibbeFTP.jar**
 
 # Usage
+
+### Run as jar
 java -jar TibbeFTP.jar \<ftp-base\> |-disable-logging| |-port=CommandPort|:DataPortMin-DataPortMax|
 
 \<ftp-base\> is a directory containing accounts.txt (that you create) logs stored by the application and user home directories (if not set in accounts.txt)
+
+
+### Run in docker
+Please see: https://hub.docker.com/repository/docker/jespertiberg/tibbeftp
 
 ### Format for accounts.txt
 This is a file with 2 or 3 columns per row.
