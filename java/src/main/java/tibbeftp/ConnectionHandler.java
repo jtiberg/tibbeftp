@@ -170,6 +170,7 @@ public class ConnectionHandler extends Thread {
                 boolean dataIpSameAsCommandPortIp = s.getInetAddress().equals(mSocket.getInetAddress());
                 if (!allowAnyDataPortIp && !dataIpSameAsCommandPortIp) {
                     logger.warning("Illegal data connection: Source IP mismatch: " + s.getInetAddress());
+                    Logger.logToConsole("Illegal data port access from IP " + s.getInetAddress() + "  (PASV download pending for " + username + ")");
                     s.close();
                 }
             }
@@ -260,7 +261,7 @@ public class ConnectionHandler extends Thread {
             long startT = System.currentTimeMillis();
             OutputStream out = s.getOutputStream();
             send("150 Opening data connection for file " + fil + " (" + f.length() + " bytes)");
-            logger.notify("GET " + f + " via " + s);
+            logger.info("GET " + f + " via " + s);
 
             long totalData = 0;
             FileInputStream fin = new FileInputStream(f);
@@ -301,12 +302,12 @@ public class ConnectionHandler extends Thread {
             long startT = System.currentTimeMillis();
             InputStream in = s.getInputStream();
             send("150 Opening " + transferMode + " mode data connection for file " + fil);
-            logger.notify("PUT " + f + " via " + s);
+            logger.info("PUT " + f + " via " + s);
 
             boolean append = mRest == -1 || mRest == f.length();
 
             if (mRest > 0 && append) {
-                logger.notify("WARNING!!! rest=" + mRest + ", flen=" + f.length());
+                logger.info("WARNING!!! rest=" + mRest + ", flen=" + f.length());
             }
 
             FileOutputStream fout = new FileOutputStream(f.getPath(), append);
@@ -364,7 +365,7 @@ public class ConnectionHandler extends Thread {
      */
     private boolean mkdir(String name) throws IOException {
         File f = mFakeRoot.getFile(name);
-        logger.notify("mkdir " + f);
+        logger.info("mkdir " + f);
         if (f == null) {
             send("550 " + name + ": Permission denied");
             return false;
@@ -400,7 +401,7 @@ public class ConnectionHandler extends Thread {
      */
     private boolean dele(String name) throws IOException {
         File f = mFakeRoot.getFile(name);
-        logger.notify("Delete " + f);
+        logger.info("Delete " + f);
         if (f == null) {
             send("550 " + name + ": Permission denied");
             return false;
@@ -422,7 +423,7 @@ public class ConnectionHandler extends Thread {
      */
     private boolean rm(String name) throws IOException {
         File f = mFakeRoot.getFile(name);
-        logger.notify("Delete " + f);
+        logger.info("Delete " + f);
         if (f == null) {
             send("550 " + name + ": Permission denied");
             return false;
@@ -609,7 +610,7 @@ public class ConnectionHandler extends Thread {
                 } catch (IOException e) {
                 }
             }
-            logger.notify("Connection closed to " + (loggedIn ? username + "@ " : "") + mSocket.getInetAddress());
+            logger.info("Connection closed to " + (loggedIn ? username + "@ " : "") + mSocket.getInetAddress());
         }
     }
 
@@ -665,10 +666,12 @@ public class ConnectionHandler extends Thread {
                 }
 
                 if (a == null) {
-                    logger.notify("LoginFail for " + username);
+                    logger.info("LoginFail for " + username);
                     send("530 Login incorrect.");
+                    Logger.logToConsole("LoginFail for " + username + " from " + mSocket.getInetAddress());
                 } else {
-                    logger.notify("Login " + username);
+                    Logger.logToConsole("LoginOK for " + username + " from " + mSocket.getInetAddress());
+                    logger.info("Login " + username);
                     loggedIn = true;
                     logger.setUser(a.getLogin());
                     if (a.getHomeDir() != null) {

@@ -55,12 +55,8 @@ public class Logger {
         }
     }
 
-    public void notify(String msg) {
-        log("Notif", msg);
-    }
-
     public void info(String msg) {
-        log("Info", msg);
+        log("INFO", msg);
     }
 
     public void warning(String msg) {
@@ -68,7 +64,7 @@ public class Logger {
     }
 
     public void error(String msg) {
-        log("Error", msg);
+        log("ERROR", msg);
     }
 
     public void recvCommand(String msg) {

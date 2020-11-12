@@ -57,6 +57,7 @@ public class MyFTP {
                 try {
                     Socket s = ss.accept();
                     mTotalConnections++;
+                    Logger.logToConsole("New connection from " + s.getInetAddress());
                     new ConnectionHandler(tg, this, s).start();
                 } catch (Exception e) {
                     e.printStackTrace();
