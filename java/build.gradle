@@ -29,6 +29,7 @@ jar {
                 "Implementation-Version": "${buildTime()}",
                 "Home": "https://github.com/jtiberg/tibbeftp"
         )
+        archiveName "../${rootProject.name}.jar"
     }
     dependsOn('dependencies')
 }
