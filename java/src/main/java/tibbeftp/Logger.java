@@ -9,7 +9,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- *
  * @author jesper
  */
 public class Logger {
@@ -38,8 +37,7 @@ public class Logger {
          */
         if (LOG_DIR != null) {
             LOG_DIR.mkdirs();
-            mLogFile = new File(LOG_DIR, fileNameDateFormat.format(new Date()) + "_"
-                + id + ".txt");
+            mLogFile = new File(LOG_DIR, fileNameDateFormat.format(new Date()) + "_" + id + ".txt");
         }
     }
 

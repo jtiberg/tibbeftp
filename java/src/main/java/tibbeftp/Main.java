@@ -20,15 +20,17 @@ public class Main {
      */
     public static void main(String[] args) {
         System.out.println("TibbeFTP version: " + MyFTP.VERSION);
+
+        if (args.length == 0) {
+            System.err.println("SYNTAX: java -jar TibbeFTP.jar <ftp-base> |-disable-logging| |-port=CommandPort|:DataPortMin-DataPortMax|");
+            System.exit(1);
+        }
+
         String ftpIp = System.getenv("FTP_IP");
         if (ftpIp != null) {
             System.out.println("Passive server IP set to " + ftpIp);
         } else {
             System.out.println("External IP: " + Utils.getGlobalAddress());
-        }
-        if (args.length == 0) {
-            System.err.println("SYNTAX: TibbeFTP.jar <FTP_HOME> |-disable-logging| |-port=CMDport|:DATAportmin-DATAportmax||");
-            System.exit(1);
         }
 
         boolean disableLogging = false;
@@ -40,10 +42,10 @@ public class Main {
                 System.out.println("Logging disabled");
             }
             if (tmp.startsWith("-port=")) {
-                String ports[] = tmp.substring(6).split(":");
+                String[] ports = tmp.substring(6).split(":");
                 MyFTP.FTP_PORT = Integer.parseInt(ports[0]);
                 if (ports.length > 1) {
-                    String dataPortRange[] = ports[1].split("-");
+                    String[] dataPortRange = ports[1].split("-");
                     MyFTP.PASV_RANGE_MIN = Integer.parseInt(dataPortRange[0]);
                     MyFTP.PASV_RANGE_MAX = Integer.parseInt(dataPortRange[1]);
                 }

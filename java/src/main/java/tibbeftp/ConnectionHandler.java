@@ -1,15 +1,6 @@
 package tibbeftp;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -27,9 +18,8 @@ import java.util.TimeZone;
 public class ConnectionHandler extends Thread {
 
     enum TransferMode {
-
         TEXT, BINARY
-    };
+    }
 
     private final Logger logger;
     private long mStartTime = 0;
@@ -53,7 +43,7 @@ public class ConnectionHandler extends Thread {
     private String mPortIP = null;
     private int mPortPort;
     private boolean loggedIn = false;
-    private String username = null, password = null;
+    private String username = null;
     private TransferMode transferMode = TransferMode.TEXT;
 
     private String mCurrentEncoding = "UTF-8";
@@ -78,7 +68,7 @@ public class ConnectionHandler extends Thread {
 
     public String oneLineInfo() {
         String ret = new Date(mStartTime) + "\t" + mSocket.getInetAddress().getHostAddress() + "\t" + mMyIP + "\t";
-        if(mServerSocketData != null){
+        if (mServerSocketData != null) {
             ret += "ssport:" + mServerSocketData.getLocalPort() + "\t";
         }
         if (mAccount != null) {
@@ -113,9 +103,8 @@ public class ConnectionHandler extends Thread {
     }
 
     /**
-     *
      * @param startR start of range for serversocket
-     * @param endR end of range
+     * @param endR   end of range
      * @return true if serversocket exists or one was created successfully
      * @throws IOException if unable to create a serversocket
      */
@@ -227,7 +216,7 @@ public class ConnectionHandler extends Thread {
             }
 
             // List all files in the directory
-            File files[] = mFakeRoot.listFiles();
+            File[] files = mFakeRoot.listFiles();
             if (files != null) {
                 for (int i = 0; i < files.length; i++) {
                     tmp = getFileInfoLineForList(files[i]);
@@ -270,7 +259,7 @@ public class ConnectionHandler extends Thread {
             FileInputStream fin = new FileInputStream(f);
             fin.skip(mRest);
             mRest = 0;
-            byte buffer[] = new byte[1024 * 100];
+            byte[] buffer = new byte[1024 * 100];
             int read;
             while ((read = fin.read(buffer)) != -1) {
                 out.write(buffer, 0, read);
@@ -318,7 +307,7 @@ public class ConnectionHandler extends Thread {
 
             long totalData = 0;
             if (transferMode == TransferMode.BINARY) {
-                byte buffer[] = new byte[1024 * 100];
+                byte[] buffer = new byte[1024 * 100];
                 int read;
                 while ((read = in.read(buffer)) != -1) {
                     fout.write(buffer, 0, read);
@@ -590,7 +579,7 @@ public class ConnectionHandler extends Thread {
                 }
             }
         } catch (SocketException e) {
-            if(!clientQuit){
+            if (!clientQuit) {
                 logger.error(e);
             }
         } catch (Exception e) {
@@ -618,7 +607,6 @@ public class ConnectionHandler extends Thread {
     }
 
     /**
-     *
      * @param cmd
      * @param arg
      * @return true if command was handled, false otherwise
