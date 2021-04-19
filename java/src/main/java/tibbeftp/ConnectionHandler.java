@@ -122,9 +122,12 @@ public class ConnectionHandler extends Thread {
             if (startR == 0) {
                 mServerSocketData = new ServerSocket();
             } else { // otherwise, scan for a free port in the range
-                for (int i = startR; i <= endR; i++) {
+                int rangeSize = endR - startR + 1;
+                int randomIndexStart = (int) (Math.random() * rangeSize);
+                for (int i = 0; i < rangeSize; i++) {
+                    int port = ((randomIndexStart + i) % rangeSize) + startR;
                     try {
-                        mServerSocketData = new ServerSocket(i);
+                        mServerSocketData = new ServerSocket(port);
                         break;
                     } catch (IOException e) {
                         // port probably in use, try the next in the range
@@ -186,8 +189,8 @@ public class ConnectionHandler extends Thread {
                 int port = mServerSocketData == null ? -1 : mServerSocketData.getLocalPort();
                 try {
                     s = mServerSocketData.accept();
-                    Logger.logToConsole("PASV_SERVERSOCKET ACCEPTED " + username + " Port=" + port);
-                }catch(SocketTimeoutException e){
+                    Logger.logToConsole("PASV_SERVERSOCKET ACCEPTED " + username + " Port=" + port + " from " + s.getInetAddress());
+                } catch (SocketTimeoutException e) {
                     Logger.logToConsole("PASV_SERVERSOCKET TIMEOUT " + username + " Port=" + port);
                     throw e;
                 }
@@ -238,7 +241,8 @@ public class ConnectionHandler extends Thread {
         try {
             Socket s = openConnection();
             OutputStream dataOut = s.getOutputStream();
-            send("150 OK Here comes the file!");
+            send("150 OK Sending file list to " + s.getInetAddress());
+            logger.info("Sending filelist " + mFakeRoot.getCurDir() + " via " + s);
 
             String tmp = getFileInfoLineForList(mFakeRoot.getFile("."));
             dataOut.write(tmp.getBytes(mCurrentEncoding));
@@ -286,7 +290,7 @@ public class ConnectionHandler extends Thread {
             Socket s = openConnection();
             long startT = System.currentTimeMillis();
             OutputStream out = s.getOutputStream();
-            send("150 Opening data connection for file " + fil + " (" + f.length() + " bytes)");
+            send("150 Opened data connection for file " + fil + " (" + f.length() + " bytes) to " + s.getInetAddress());
             logger.info("GET " + f + " via " + s);
 
             long totalData = 0;
@@ -327,7 +331,7 @@ public class ConnectionHandler extends Thread {
             Socket s = openConnection();
             long startT = System.currentTimeMillis();
             InputStream in = s.getInputStream();
-            send("150 Opening " + transferMode + " mode data connection for file " + fil);
+            send("150 Opened " + transferMode + " mode data connection for file " + fil + " to " + s.getInetAddress());
             logger.info("PUT " + f + " via " + s);
 
             boolean append = mRest == -1 || mRest == f.length();
