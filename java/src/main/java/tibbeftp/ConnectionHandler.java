@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -144,10 +145,26 @@ public class ConnectionHandler extends Thread {
      * Set passive or active mode
      */
     private void pasv(int startR, int endR) throws IOException {
-        if (useExistingOrCreateNewServerSocket(startR, endR)) {
+        boolean serverSocketOpened = false;
+        for (int i = 0; i < 10; i++) {
+            serverSocketOpened = useExistingOrCreateNewServerSocket(startR, endR);
+            if (serverSocketOpened) {
+                break;
+            } else {
+                Logger.logToConsole("PASV_SERVERSOCKET FAILED_ATTEMPT_TO_ALLOCATE port for " + username);
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    break;
+                }
+            }
+        }
+        if (serverSocketOpened) {
+            int port = mServerSocketData == null ? -1 : mServerSocketData.getLocalPort();
+            Logger.logToConsole("PASV_SERVERSOCKET OPEN for " + username + " Port=" + port);
             send("227 Entering Passive Mode (" + Utils.ipAndPortToFTPformat(mMyIP, mDataPort) + ").");
         } else {
-            Logger.logToConsole("Critical: Unable to open serversocket for " + username + " (perhaps some client is misbehaving, or a larger range needs to be allocated). Infosys output: " + mMyFTP.getSysInfo());
+            Logger.logToConsole("PASV_SERVERSOCKET ABORT_FAILED_TO_ALLOCATE for " + username + " (perhaps some client is misbehaving, or a larger range needs to be allocated). Infosys output: " + mMyFTP.getSysInfo());
             send("550 Could not open serversocket");
         }
     }
@@ -166,7 +183,15 @@ public class ConnectionHandler extends Thread {
             if (mActive) {
                 s = new Socket(mPortIP, mPortPort);
             } else if (mPasv) {
-                s = mServerSocketData.accept();
+                int port = mServerSocketData == null ? -1 : mServerSocketData.getLocalPort();
+                try {
+                    s = mServerSocketData.accept();
+                    Logger.logToConsole("PASV_SERVERSOCKET ACCEPTED " + username + " Port=" + port);
+                }catch(SocketTimeoutException e){
+                    Logger.logToConsole("PASV_SERVERSOCKET TIMEOUT " + username + " Port=" + port);
+                    throw e;
+                }
+
                 boolean dataIpSameAsCommandPortIp = s.getInetAddress().equals(mSocket.getInetAddress());
                 if (!allowAnyDataPortIp && !dataIpSameAsCommandPortIp) {
                     logger.warning("Illegal data connection: Source IP mismatch: " + s.getInetAddress());
@@ -235,7 +260,8 @@ public class ConnectionHandler extends Thread {
 
             send("226 Transfer complete.");
         } catch (IOException e) {
-            send("425 Unable to build data connection!");
+            send("425 Unable to build data connection for list: " + e);
+            logger.error(e);
             return false;
         }
 
@@ -279,8 +305,8 @@ public class ConnectionHandler extends Thread {
             double kBps = totalData / 1.024 / (System.currentTimeMillis() - startT);
             send("226 Transfer complete - " + Utils.maxDec(kBps, 1) + " KB/s");
         } catch (IOException e) {
+            send("425 Unable to build data connection for retr: " + e);
             logger.error(e);
-            send("425 Unable to build data connection! " + e);
             return false;
         }
 
