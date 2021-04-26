@@ -26,6 +26,8 @@ public class Main {
             System.exit(1);
         }
 
+        System.out.println("PASV_PROMISCUOUS: " + MyFTP.PASV_PROMISCUOUS);
+        System.out.println("PASV_TIMEOUT: " + MyFTP.PASV_TIMEOUT + " ms");
         String ftpIp = System.getenv("FTP_IP");
         if (ftpIp != null) {
             System.out.println("Passive server IP set to " + ftpIp);

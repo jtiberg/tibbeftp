@@ -18,8 +18,6 @@ import java.util.TimeZone;
  */
 public class ConnectionHandler extends Thread {
 
-    public static final boolean allowAnyDataPortIp = "true".equals(System.getenv("PASV_PROMISCUOUS"));
-
     enum TransferMode {
         TEXT, BINARY
     }
@@ -127,7 +125,7 @@ public class ConnectionHandler extends Thread {
                 for (int i = 0; i < rangeSize; i++) {
                     int port = ((randomIndexStart + i) % rangeSize) + startR;
                     try {
-                        mServerSocketData = new ServerSocket(port);
+                        mServerSocketData = new ServerSocket(port, 1);
                         break;
                     } catch (IOException e) {
                         // port probably in use, try the next in the range
@@ -137,7 +135,7 @@ public class ConnectionHandler extends Thread {
             // Were we successful in creating a server socket?
             if (mServerSocketData != null) {
                 mDataPort = mServerSocketData.getLocalPort();
-                mServerSocketData.setSoTimeout(10000);
+                mServerSocketData.setSoTimeout(MyFTP.PASV_TIMEOUT);
                 return true;
             }
         }
@@ -196,7 +194,7 @@ public class ConnectionHandler extends Thread {
                 }
 
                 boolean dataIpSameAsCommandPortIp = s.getInetAddress().equals(mSocket.getInetAddress());
-                if (!allowAnyDataPortIp && !dataIpSameAsCommandPortIp) {
+                if (!MyFTP.PASV_PROMISCUOUS && !dataIpSameAsCommandPortIp) {
                     logger.warning("Illegal data connection: Source IP mismatch: " + s.getInetAddress());
                     Logger.logToConsole("Illegal data port access from IP " + s.getInetAddress() + "  (PASV download pending for " + username + ")");
                     s.close();
@@ -287,6 +285,7 @@ public class ConnectionHandler extends Thread {
         }
 
         try {
+            //try{Thread.sleep(1000);}catch(InterruptedException e){}
             Socket s = openConnection();
             long startT = System.currentTimeMillis();
             OutputStream out = s.getOutputStream();

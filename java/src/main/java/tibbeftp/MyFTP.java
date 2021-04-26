@@ -12,6 +12,8 @@ public class MyFTP {
     public static int FTP_PORT = 21;
     public static int PASV_RANGE_MIN = 8123;
     public static int PASV_RANGE_MAX = 8129;
+    public static final boolean PASV_PROMISCUOUS = "true".equals(System.getenv("PASV_PROMISCUOUS"));
+    public static final int PASV_TIMEOUT;
 
     static {
         String tmp = MyFTP.class.getPackage().getImplementationVersion();
@@ -20,6 +22,8 @@ public class MyFTP {
         } else {
             VERSION = tmp;
         }
+        String pasvTimeoutEnv = System.getenv("PASV_TIMEOUT");
+        PASV_TIMEOUT = pasvTimeoutEnv == null ? 30000 : Integer.parseInt(pasvTimeoutEnv) * 1000;
     }
 
     private final ThreadGroup tg = new ThreadGroup("Connections");
